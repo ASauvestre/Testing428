@@ -11,13 +11,12 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.util.concurrent.TimeUnit;
-
 public class StepDefinitions {
     private WebDriver driver;
 
     private final String PATH_TO_WEBDRIVER = "C:\\chromedriver.exe";
     private final String SIGNIN_PAGE_URL = "https://accounts.google.com/signin/v2/identifier?continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&service=mail&sacu=1&rip=1&flowName=GlifWebSignIn&flowEntry=ServiceLogin";
+    private final String MAIN_PAGE_URL = "https://mail.google.com/mail/#inbox";
     private final String SIGNIN_PAGE_USERNAME_ID = "identifierId";
     private final String SIGNIN_PAGE_USERNAME_NEXT_ID = "identifierNext";
     private final String SIGNIN_PAGE_PASSWORD_NAME = "password";
@@ -26,7 +25,7 @@ public class StepDefinitions {
     private final String USER_PASSWORD = "ecse428-";
 
     @Given("I am logged in")
-    public void iAmLoggedIn() throws Throwable{
+    public void iAmLoggedIn() {
         setupSeleniumWebDrivers();
         goTo(SIGNIN_PAGE_URL);
 
@@ -42,24 +41,22 @@ public class StepDefinitions {
         WebElement second_next_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id(SIGNIN_PAGE_PASSWORD_NEXT_ID)));
         second_next_button.click();
 
-        TimeUnit.SECONDS.sleep(10);
-
-        String URL = driver.getCurrentUrl();
-        System.out.println(URL);
+        (new WebDriverWait(driver, 10)).until(ExpectedConditions.urlToBe(MAIN_PAGE_URL));
     }
 
     @And("I am on the Gmail main page")
     public void iAmOnTheGmailMainPage() {
-
+        setupSeleniumWebDrivers();
+        goTo(MAIN_PAGE_URL);
     }
 
     @When("I press {string}")
     public void iPress(String arg0) {
     }
 
-    @And("I compose an email to dibbo.ritwik@mail.mcgill.ca")
-    public void iComposeAnEmailToDibboRitwikMailMcgillCa() {
-
+    @And("I compose an email to {string}")
+    public void iComposeAnEmailTo(String email) {
+        System.out.println(email);
     }
 
     @And("I attach a picture")
