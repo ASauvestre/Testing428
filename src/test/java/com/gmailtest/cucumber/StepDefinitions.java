@@ -5,11 +5,14 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.util.concurrent.TimeUnit;
 
 public class StepDefinitions {
     private WebDriver driver;
@@ -23,15 +26,18 @@ public class StepDefinitions {
     private final String SIGNIN_PAGE_PASSWORD_NEXT_ID = "passwordNext";
     private final String USER_MAIL = "practicetesting4@gmail.com";
     private final String USER_PASSWORD = "ecse428-";
+    private final String COMPOSE_URL= "https://mail.google.com/mail/u/0/#inbox?compose=new";
+    private final String COMPOSE_XPATH="//*[@aria-label=\"Navigate to\"]/../../../div[1]/div/div/div/div/div/div";
+    private final String SUBJECT_XPATH="//*[@aria-label=\"Subject\"]";
+    private final String ATTACH_XPATH="//*[@aria-label=\"Attach files\"]/div/div/div";
+    private final String SEND_KEY="//*[contains(@aria-label,'Send')]";
 
     @Given("I am logged in")
     public void iAmLoggedIn() {
         setupSeleniumWebDrivers();
         goTo(SIGNIN_PAGE_URL);
-
         WebElement user_field = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id(SIGNIN_PAGE_USERNAME_ID)));
         user_field.sendKeys(USER_MAIL);
-
         WebElement next_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id(SIGNIN_PAGE_USERNAME_NEXT_ID)));
         next_button.click();
 
@@ -52,20 +58,43 @@ public class StepDefinitions {
 
     @When("I press {string}")
     public void iPress(String arg0) {
+        setupSeleniumWebDrivers();
+        WebElement compose_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(COMPOSE_XPATH)));
+        compose_button.click();
     }
 
+    //doesn't work
     @And("I compose an email to {string}")
-    public void iComposeAnEmailTo(String email) {
-        System.out.println(email);
+    public void iComposeAnEmailTo(String arg0) {
+        setupSeleniumWebDrivers();
+        System.out.println("before subject");
+        WebElement random = (new WebDriverWait(driver, 20)).until(ExpectedConditions.elementToBeClickable(By.xpath(SUBJECT_XPATH)));
+        random.sendKeys(arg0);
+       // System.out.println("before to");
+
+
+
+
+
+
+
     }
 
     @And("I attach a picture")
     public void iAttachAPicture() {
+        driver.findElement(By.name("Filedata")).sendKeys("C:\\Users\\dibbo\\OneDrive\\Desktop\\GGMU.JPEG");
+
 
     }
 
+    //trying to make it work
     @Then("the email should be sent")
-    public void theEmailShouldBeSent() {
+    public void theEmailShouldBeSent() throws InterruptedException {
+        System.out.println("before sleep");
+        TimeUnit.SECONDS.sleep(20);
+        System.out.println("after sleep");
+        WebElement send = (new WebDriverWait(driver, 20)).until(ExpectedConditions.elementToBeClickable(By.xpath(SEND_KEY)));
+        send.click();
     }
 
     // Helper functions
