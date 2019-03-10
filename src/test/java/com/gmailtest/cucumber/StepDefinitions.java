@@ -54,8 +54,8 @@ public class StepDefinitions {
         (new WebDriverWait(driver, 10)).until(ExpectedConditions.urlToBe(MAIN_PAGE_URL));
     }
 
-    @And("they compose an email to ([^\"]*)")
-    public void iComposeAnEmailTo(String email_address) {
+    @And("they compose an email to ([^\"]*) with attachment ([^\"]*)")
+    public void iComposeAnEmailTo(String email_address, String filename) {
         setupSeleniumWebDrivers();
         generateString();
         goTo(MAIN_PAGE_URL);
@@ -67,6 +67,12 @@ public class StepDefinitions {
 
         WebElement subject = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(SUBJECT_XPATH)));
         subject.sendKeys(subject_text);
+
+        this.filename = filename;
+        String basePath = new File("").getAbsolutePath();
+        driver.findElement(By.name("Filedata")).sendKeys(basePath + "/src/test/resources/" + this.filename);
+        WebElement send_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='Send']")));
+        send_button.click();
     }
 
     @When("they don't specify an email address")
@@ -74,10 +80,12 @@ public class StepDefinitions {
         goTo(MAIN_PAGE_URL);
         WebElement compose_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(COMPOSE_XPATH)));
         compose_button.click();
+        WebElement send_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='Send']")));
+        send_button.click();
     }
 
-    @When("they compose an email to {string} without a body or subject")
-    public void iComposeAnEmailToWithNoSubjectOrBody(String email_address) {
+    @When("they compose an email without a body or subject to ([^\"]*) with attachment ([^\"]*)")
+    public void iComposeAnEmailToWithNoSubjectOrBody(String email_address, String filename) {
         goTo(MAIN_PAGE_URL);
         WebElement compose_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(COMPOSE_XPATH)));
         compose_button.click();
@@ -86,22 +94,15 @@ public class StepDefinitions {
 
         WebElement to = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(TO_XPATH)));
         to.sendKeys(email_address);
-    }
 
-    @And("they attach ([^\"]*)")
-    public void iAttachAPicture(String filename) {
         this.filename = filename;
         String basePath = new File("").getAbsolutePath();
         driver.findElement(By.name("Filedata")).sendKeys(basePath + "/src/test/resources/" + this.filename);
         WebElement send_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='Send']")));
         send_button.click();
-    }
 
-    @And("they handle the pop up to send the email")
-    public void iClickThePopup() {
         driver.switchTo().alert().accept();
     }
-
 
     @Then("the email should be found in the sent folder")
     public void theEmailShouldBeSent() {
@@ -116,7 +117,7 @@ public class StepDefinitions {
 
         WebElement inbox = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(@aria-label,'Inbox')]")));
         inbox.click();
-        WebElement SignOut = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(@aria-label,'Google Account: Garbage Practice')]")));
+        WebElement SignOut = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(@aria-label,'Google Account: Testing Practice')]")));
         SignOut.click();
         WebElement SignOut_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.linkText("Sign out")));
         SignOut_button.click();
@@ -136,7 +137,13 @@ public class StepDefinitions {
 
         (new WebDriverWait(driver, 1)).until(ExpectedConditions.invisibilityOfElementLocated(By.className("Kj-JD-Jh")));
 
-        WebElement SignOut = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//a[contains(@aria-label,'Google Account: Garbage Practice')]")));
+        signOut();
+    }
+
+
+    // Helper functions
+    private void signOut() {
+        WebElement SignOut = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//a[contains(@aria-label,'Google Account: Testing Practice')]")));
         SignOut.click();
         WebElement SignOut_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.linkText("Sign out")));
         SignOut_button.click();
@@ -151,7 +158,6 @@ public class StepDefinitions {
         driver.quit();
     }
 
-    // Helper functions
     private void generateString() {
         String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         StringBuilder salt = new StringBuilder();

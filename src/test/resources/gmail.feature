@@ -2,8 +2,7 @@ Feature: Gmail
 
   Scenario Outline: Normal Flow: Sending an email with a picture
     Given A user is logged in
-    When they compose an email to <email>
-    And they attach <file>
+    When they compose an email to <email> with attachment <file>
     Then the email should be found in the sent folder
 
     Examples:
@@ -17,15 +16,9 @@ Feature: Gmail
   Scenario: Error Flow: Sending an email without a recipient
     Given A user is logged in
     When they don't specify an email address
-    And they attach 1.jpg
     Then the email should not be sent
-
 
   Scenario: Alternate Flow: Sending an email with a picture
     Given A user is logged in
-    When they compose an email to "dibbo.ritwik@mail.mcgill.ca" without a body or subject
-    And they attach 5.jpg
-    And they handle the pop up to send the email
+    When they compose an email without a body or subject to dibbo.ritwik@mail.mcgill.ca with attachment 5.jpg
     Then the email should be found in the sent folder
-
-
