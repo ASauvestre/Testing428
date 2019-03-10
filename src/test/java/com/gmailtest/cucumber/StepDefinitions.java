@@ -11,8 +11,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.Random;
 
@@ -69,7 +67,7 @@ public class StepDefinitions {
     }
 
     //doesn't work
-    @And("I compose an email to {string}")
+    @And("I compose an email to ([^\"]*)")
     public void iComposeAnEmailTo(String email_address) {
         this.email_address = email_address;
         generateString();
@@ -82,22 +80,18 @@ public class StepDefinitions {
         subject.sendKeys(subject_text);
     }
 
-    @And("I attach {string}")
+    @And("I attach ([^\"]*)")
     public void iAttachAPicture(String filename) {
         this.filename = filename;
         String basePath = new File("").getAbsolutePath();
-        driver.findElement(By.name("Filedata")).sendKeys(basePath + "/src/test/resources/" + this.filename);
+        driver.findElement(By.name("Filedata")).sendKeys(basePath + "/src/test/re" +
+                "sources/" + this.filename);
     }
 
     @And("I press Send")
-    public void iPressSend() throws AWTException {
-        Robot robot = new Robot();
-
-        robot.keyPress(KeyEvent.VK_CONTROL);
-        robot.keyPress(KeyEvent.VK_ENTER);
-
-        robot.keyRelease(KeyEvent.VK_ENTER);
-        robot.keyRelease(KeyEvent.VK_CONTROL);
+    public void iPressSend() {
+        WebElement send_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='Send']")));
+        send_button.click();
     }
 
     @Then("the email should be sent")
@@ -107,12 +101,7 @@ public class StepDefinitions {
 
         if (driver.findElement(By.xpath("//div[text()='" + this.filename + "']")) != null) {
             if (driver.findElement(By.xpath("//div[text()='" + this.subject_text + "']")) != null) {
-                WebElement mail = null;
-                while(mail == null) {
-                    WebDriverWait wait = new WebDriverWait(driver, 10);
-                    mail = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@email=\"" + this.email_address + "\"]/../..")));
-                }
-                mail.click();
+                System.out.println("Email sent.");
             }
         }
 
@@ -120,10 +109,12 @@ public class StepDefinitions {
         inbox.click();
         WebElement SignOut = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(@aria-label,'Google Account: Garbage Practice')]")));
         SignOut.click();
-        WebElement SignOut_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.id("gb_71")));
+        WebElement SignOut_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.linkText("Sign out")));
         SignOut_button.click();
 
         driver.switchTo().alert().accept();
+
+        driver.quit();
     }
 
     // Helper functions
@@ -135,22 +126,20 @@ public class StepDefinitions {
             int index = (int) (rnd.nextFloat() * SALTCHARS.length());
             salt.append(SALTCHARS.charAt(index));
         }
-        subject_text = salt.toString();
 
+        subject_text = salt.toString();
     }
 
     private void setupSeleniumWebDrivers() {
         if (driver == null) {
-            System.out.println("Setting up ChromeDriver... ");
             System.setProperty("webdriver.chrome.driver", PATH_TO_WEBDRIVER);
             driver = new ChromeDriver();
-            System.out.print("Done!\n");
+
         }
     }
 
     private void goTo(String url) {
         if (driver != null) {
-            System.out.println("Going to " + url);
             driver.get(url);
         }
     }
