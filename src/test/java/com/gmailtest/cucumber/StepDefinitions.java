@@ -129,6 +129,27 @@ public class StepDefinitions {
         driver.quit();
     }
 
+    @Then("the email should not be sent")
+    public void theEmailShouldNotBeSent() {
+        if (driver.findElement(By.xpath("//div[text()='" + ERROR_TEXT_ + "']")) != null) {
+            System.out.println("Email not sent.");
+            WebElement okay_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.name("ok")));
+            okay_button.click();
+        }
+
+
+        WebElement inbox = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(@aria-label,'Inbox')]")));
+        inbox.click();
+        WebElement SignOut = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(@aria-label,'Google Account: Garbage Practice')]")));
+        SignOut.click();
+        WebElement SignOut_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.linkText("Sign out")));
+        SignOut_button.click();
+
+        driver.switchTo().alert().accept();
+
+        driver.quit();
+    }
+
     // Helper functions
     private void generateString() {
         String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
@@ -154,27 +175,5 @@ public class StepDefinitions {
         if (driver != null) {
             driver.get(url);
         }
-    }
-
-    @Then("the email should not be sent")
-    public void theEmailShouldNotBeSent() {
-        if (driver.findElement(By.xpath("//div[text()='" + ERROR_TEXT_ + "']")) != null) {
-            System.out.println("Email not sent.");
-            WebElement okay_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.name("ok")));
-            okay_button.click();
-        }
-
-
-        WebElement inbox = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(@aria-label,'Inbox')]")));
-        inbox.click();
-        WebElement SignOut = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(@aria-label,'Google Account: Garbage Practice')]")));
-        SignOut.click();
-        WebElement SignOut_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.linkText("Sign out")));
-        SignOut_button.click();
-
-        driver.switchTo().alert().accept();
-
-        driver.quit();
-
     }
 }
