@@ -1,6 +1,6 @@
 Feature: Gmail
 
-  Scenario Outline: Sending an email with a picture
+  Scenario Outline: Normal Flow: Sending an email with a picture
     Given I am logged in
     And I am on the Gmail main page
     When I press Compose
