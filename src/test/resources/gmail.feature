@@ -1,13 +1,10 @@
 Feature: Gmail
 
   Scenario Outline: Normal Flow: Sending an email with a picture
-    Given I am logged in
-    And I am on the Gmail main page
-    When I press Compose
-    And I compose an email to <email>
-    And I attach <file>
-    And I press Send
-    Then the email should be sent
+    Given A user is logged in
+    When they compose an email to <email>
+    And they attach <file>
+    Then the email should be found in the sent folder
 
     Examples:
       | email                           | file  |
@@ -18,22 +15,17 @@ Feature: Gmail
       | djadeed@gmail.com               | 5.jpg |
 
   Scenario: Error Flow: Sending an email without a recipient
-    Given I am logged in
-    And I am on the Gmail main page
-    When I press Compose
-    And I attach 1.jpg
-    And I press Send
+    Given A user is logged in
+    When they don't specify an email address
+    And they attach 1.jpg
     Then the email should not be sent
 
 
   Scenario: Alternate Flow: Sending an email with a picture
-    Given I am logged in
-    And I am on the Gmail main page
-    When I press Compose
-    And I compose an email to "dibbo.ritwik@mail.mcgill.ca" with no subject or body
-    And I attach 5.jpg
-    And I press Send
-    And I click the no subject popup
-    Then the email should be sent
+    Given A user is logged in
+    When they compose an email to "dibbo.ritwik@mail.mcgill.ca" without a body or subject
+    And they attach 5.jpg
+    And they handle the pop up to send the email
+    Then the email should be found in the sent folder
 
 

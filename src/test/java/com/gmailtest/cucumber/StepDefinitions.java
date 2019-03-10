@@ -36,7 +36,7 @@ public class StepDefinitions {
     private String subject_text;
     private String filename;
 
-    @Given("I am logged in")
+    @Given("A user is logged in")
     public void iAmLoggedIn() {
         setupSeleniumWebDrivers();
         goTo(SIGNIN_PAGE_URL);
@@ -54,23 +54,13 @@ public class StepDefinitions {
         (new WebDriverWait(driver, 10)).until(ExpectedConditions.urlToBe(MAIN_PAGE_URL));
     }
 
-    @And("I am on the Gmail main page")
-    public void iAmOnTheGmailMainPage() {
+    @And("they compose an email to ([^\"]*)")
+    public void iComposeAnEmailTo(String email_address) {
         setupSeleniumWebDrivers();
+        generateString();
         goTo(MAIN_PAGE_URL);
-    }
-
-    @When("I press Compose")
-    public void iPress() {
-        setupSeleniumWebDrivers();
         WebElement compose_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(COMPOSE_XPATH)));
         compose_button.click();
-    }
-
-    @And("I compose an email to ([^\"]*)")
-    public void iComposeAnEmailTo(String email_address) {
-        generateString();
-        setupSeleniumWebDrivers();
 
         WebElement to = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(TO_XPATH)));
         to.sendKeys(email_address);
@@ -79,8 +69,18 @@ public class StepDefinitions {
         subject.sendKeys(subject_text);
     }
 
-    @And("I compose an email to {string} with no subject or body")
+    @When("they don't specify an email address")
+    public void theyDonTSpecifyAnEmailAddress() {
+        goTo(MAIN_PAGE_URL);
+        WebElement compose_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(COMPOSE_XPATH)));
+        compose_button.click();
+    }
+
+    @When("they compose an email to {string} without a body or subject")
     public void iComposeAnEmailToWithNoSubjectOrBody(String email_address) {
+        goTo(MAIN_PAGE_URL);
+        WebElement compose_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(COMPOSE_XPATH)));
+        compose_button.click();
         this.subject_text = "subject";
         setupSeleniumWebDrivers();
 
@@ -88,25 +88,22 @@ public class StepDefinitions {
         to.sendKeys(email_address);
     }
 
-    @And("I attach ([^\"]*)")
+    @And("they attach ([^\"]*)")
     public void iAttachAPicture(String filename) {
         this.filename = filename;
         String basePath = new File("").getAbsolutePath();
         driver.findElement(By.name("Filedata")).sendKeys(basePath + "/src/test/resources/" + this.filename);
-    }
-
-    @And("I click the no subject popup")
-    public void iClickThePopup() {
-        driver.switchTo().alert().accept();
-    }
-
-    @And("I press Send")
-    public void iPressSend() {
         WebElement send_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='Send']")));
         send_button.click();
     }
 
-    @Then("the email should be sent")
+    @And("they handle the pop up to send the email")
+    public void iClickThePopup() {
+        driver.switchTo().alert().accept();
+    }
+
+
+    @Then("the email should be found in the sent folder")
     public void theEmailShouldBeSent() {
         WebElement sent_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(SENT_XPATH)));
         sent_button.click();
@@ -131,7 +128,6 @@ public class StepDefinitions {
 
     @Then("the email should not be sent")
     public void theEmailShouldNotBeSent() {
-
         if (driver.findElement(By.xpath("//div[text()='" + ERROR_TEXT_ + "']")) != null) {
             System.out.println("Email not sent.");
             WebElement okay_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.name("ok")));
