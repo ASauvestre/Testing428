@@ -13,7 +13,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.util.*;
+import java.io.File;
+import java.util.Random;
 
 public class StepDefinitions {
     private WebDriver driver;
@@ -27,15 +28,14 @@ public class StepDefinitions {
     private final String SIGNIN_PAGE_PASSWORD_NEXT_ID = "passwordNext";
     private final String USER_MAIL = "practicetesting4@gmail.com";
     private final String USER_PASSWORD = "ecse428-";
-    private final String COMPOSE_URL= "https://mail.google.com/mail/u/0/#inbox?compose=new";
     private final String TO_XPATH= "//*[@aria-label=\"To\"]";
     private final String COMPOSE_XPATH="//*[@aria-label=\"Navigate to\"]/../../../div[1]/div/div/div/div/div/div";
     private final String SUBJECT_XPATH="//*[@aria-label=\"Subject\"]";
-    private final String ATTACH_XPATH="//*[@aria-label=\"Attach files\"]/div/div/div";
-    private final String SEND_KEY="//*[contains(@aria-label,'Send ')]";
-    private final String IMAGE_NAME= "GGMU.JPEG";
     private final String SENT_XPATH="//*[@aria-label=\"Sent\"]/../../..";
-    public String subject_text;
+
+    private String subject_text;
+    private String email_address;
+    private String filename;
 
     @Given("I am logged in")
     public void iAmLoggedIn() {
@@ -61,8 +61,8 @@ public class StepDefinitions {
         goTo(MAIN_PAGE_URL);
     }
 
-    @When("I press {string}")
-    public void iPress(String arg0) {
+    @When("I press Compose")
+    public void iPress() {
         setupSeleniumWebDrivers();
         WebElement compose_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(COMPOSE_XPATH)));
         compose_button.click();
@@ -70,54 +70,50 @@ public class StepDefinitions {
 
     //doesn't work
     @And("I compose an email to {string}")
-    public void iComposeAnEmailTo(String arg0) {
+    public void iComposeAnEmailTo(String email_address) {
+        this.email_address = email_address;
         generateString();
         setupSeleniumWebDrivers();
+
         WebElement to = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(TO_XPATH)));
-        System.out.println("before subject");
-        to.sendKeys(arg0);
+        to.sendKeys(email_address);
+
         WebElement subject = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(SUBJECT_XPATH)));
         subject.sendKeys(subject_text);
-        System.out.println("before to");
-
     }
 
-    @And("I attach a picture")
-    public void iAttachAPicture() throws InterruptedException, AWTException {
-        driver.findElement(By.name("Filedata")).sendKeys("C:\\Users\\dibbo\\OneDrive\\Desktop\\GGMU.JPEG");
-        System.out.println("before sleep");
-        Robot robot= new Robot();
+    @And("I attach {string}")
+    public void iAttachAPicture(String filename) {
+        this.filename = filename;
+        String basePath = new File("").getAbsolutePath();
+        driver.findElement(By.name("Filedata")).sendKeys(basePath + "/src/test/resources/" + this.filename);
+    }
+
+    @And("I press Send")
+    public void iPressSend() throws AWTException {
+        Robot robot = new Robot();
+
         robot.keyPress(KeyEvent.VK_CONTROL);
         robot.keyPress(KeyEvent.VK_ENTER);
-        robot.keyRelease(KeyEvent.VK_CONTROL);
+
         robot.keyRelease(KeyEvent.VK_ENTER);
-
-
-
-
+        robot.keyRelease(KeyEvent.VK_CONTROL);
     }
 
-    //trying to make it work
     @Then("the email should be sent")
-    public void theEmailShouldBeSent() throws InterruptedException, AWTException {
+    public void theEmailShouldBeSent() {
         WebElement sent_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(SENT_XPATH)));
         sent_button.click();
 
-
-        if ( driver.findElement(By.xpath("//div[text()='GGMU.JPEG']")) != null) {
-            if( driver.findElement(By.xpath("//div[text()='" + subject_text + "']")) != null){
-                System.out.println("Email was sent successfully!");
+        if (driver.findElement(By.xpath("//div[text()='" + this.filename + "']")) != null) {
+            if (driver.findElement(By.xpath("//div[text()='" + this.subject_text + "']")) != null) {
                 WebElement mail = null;
                 while(mail == null) {
                     WebDriverWait wait = new WebDriverWait(driver, 10);
-                    mail = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@email=\"adrien.sauvestre@mail.mcgill.ca\"]/../..")));
+                    mail = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@email=\"" + this.email_address + "\"]/../..")));
                 }
                 mail.click();
             }
-
-        }
-        else {
-            System.out.println("Email failed to send!");
         }
 
         WebElement inbox = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(@aria-label,'Inbox')]")));
@@ -128,14 +124,10 @@ public class StepDefinitions {
         SignOut_button.click();
 
         driver.switchTo().alert().accept();
-
-
     }
 
-
     // Helper functions
-
-    public void generateString() {
+    private void generateString() {
         String SALTCHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         StringBuilder salt = new StringBuilder();
         Random rnd = new Random();
@@ -146,6 +138,7 @@ public class StepDefinitions {
         subject_text = salt.toString();
 
     }
+
     private void setupSeleniumWebDrivers() {
         if (driver == null) {
             System.out.println("Setting up ChromeDriver... ");
@@ -161,6 +154,4 @@ public class StepDefinitions {
             driver.get(url);
         }
     }
-
-
 }
