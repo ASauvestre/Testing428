@@ -30,6 +30,7 @@ public class StepDefinitions {
     private final String COMPOSE_XPATH="//*[@aria-label=\"Navigate to\"]/../../../div[1]/div/div/div/div/div/div";
     private final String SUBJECT_XPATH="//*[@aria-label=\"Subject\"]";
     private final String SENT_XPATH="//*[@aria-label=\"Sent\"]/../../..";
+    private final String ERROR_TEXT_= "Please specify at least one recipient.";
 
     private String subject_text;
     private String email_address;
@@ -142,5 +143,27 @@ public class StepDefinitions {
         if (driver != null) {
             driver.get(url);
         }
+    }
+
+    @Then("the email should not be sent")
+    public void theEmailShouldNotBeSent() {
+        if (driver.findElement(By.xpath("//div[text()='" + ERROR_TEXT_ + "']")) != null) {
+            System.out.println("Email not sent.");
+            WebElement okay_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.name("ok")));
+            okay_button.click();
+        }
+
+
+        WebElement inbox = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(@aria-label,'Inbox')]")));
+        inbox.click();
+        WebElement SignOut = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//*[contains(@aria-label,'Google Account: Garbage Practice')]")));
+        SignOut.click();
+        WebElement SignOut_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.linkText("Sign out")));
+        SignOut_button.click();
+
+        driver.switchTo().alert().accept();
+
+        driver.quit();
+
     }
 }
