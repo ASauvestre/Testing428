@@ -13,6 +13,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.File;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class StepDefinitions {
     private WebDriver driver;
@@ -32,7 +33,6 @@ public class StepDefinitions {
     private final String SENT_XPATH="//*[@aria-label=\"Sent\"]/../../..";
 
     private String subject_text;
-    private String email_address;
     private String filename;
 
     @Given("I am logged in")
@@ -66,10 +66,8 @@ public class StepDefinitions {
         compose_button.click();
     }
 
-    //doesn't work
     @And("I compose an email to ([^\"]*)")
     public void iComposeAnEmailTo(String email_address) {
-        this.email_address = email_address;
         generateString();
         setupSeleniumWebDrivers();
 
@@ -80,12 +78,25 @@ public class StepDefinitions {
         subject.sendKeys(subject_text);
     }
 
+    @And("I compose an email to {string} with no subject or body")
+    public void iComposeAnEmailToWithNoSubjectOrBody(String email_address) {
+        this.subject_text = "subject";
+        setupSeleniumWebDrivers();
+
+        WebElement to = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(TO_XPATH)));
+        to.sendKeys(email_address);
+    }
+
     @And("I attach ([^\"]*)")
     public void iAttachAPicture(String filename) {
         this.filename = filename;
         String basePath = new File("").getAbsolutePath();
-        driver.findElement(By.name("Filedata")).sendKeys(basePath + "/src/test/re" +
-                "sources/" + this.filename);
+        driver.findElement(By.name("Filedata")).sendKeys(basePath + "/src/test/resources/" + this.filename);
+    }
+
+    @And("I click the no subject popup")
+    public void iClickThePopup() {
+        driver.switchTo().alert().accept();
     }
 
     @And("I press Send")
@@ -100,7 +111,7 @@ public class StepDefinitions {
         sent_button.click();
 
         if (driver.findElement(By.xpath("//div[text()='" + this.filename + "']")) != null) {
-            if (driver.findElement(By.xpath("//div[text()='" + this.subject_text + "']")) != null) {
+            if (driver.findElement(By.xpath("//span[contains(.,'" + this.subject_text + "')]")) != null) {
                 System.out.println("Email sent.");
             }
         }
@@ -134,7 +145,7 @@ public class StepDefinitions {
         if (driver == null) {
             System.setProperty("webdriver.chrome.driver", PATH_TO_WEBDRIVER);
             driver = new ChromeDriver();
-
+            driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
         }
     }
 

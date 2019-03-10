@@ -18,3 +18,14 @@ Feature: Gmail
       | djadeed@gmail.com               | 5.jpg |
 
 
+  Scenario: Alternate Flow: Sending an email with a picture
+    Given I am logged in
+    And I am on the Gmail main page
+    When I press Compose
+    And I compose an email to "dibbo.ritwik@mail.mcgill.ca" with no subject or body
+    And I attach 5.jpg
+    And I press Send
+    And I click the no subject popup
+    Then the email should be sent
+
+
