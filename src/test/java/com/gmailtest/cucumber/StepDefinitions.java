@@ -36,7 +36,7 @@ public class StepDefinitions {
     private String subject_text;
     private String filename;
 
-    @Given("A user is logged in")
+    @Given("the user is logged in")
     public void iAmLoggedIn() {
         setupSeleniumWebDrivers();
         goTo(SIGNIN_PAGE_URL);
@@ -84,12 +84,18 @@ public class StepDefinitions {
         send_button.click();
     }
 
-    @When("they don't specify an email address")
-    public void theyDonTSpecifyAnEmailAddress() {
+    @When("they don't specify an email address but attach ([^\"]*)")
+    public void theyDonTSpecifyAnEmailAddress(String filename) {
 
         // Click the compose button to show the message box
         WebElement compose_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath(COMPOSE_XPATH)));
         compose_button.click();
+
+        // Attach picture
+        this.filename = filename;
+        String basePath = new File("").getAbsolutePath();
+        driver.findElement(By.name("Filedata")).sendKeys(basePath + "/src/test/resources/" + this.filename);
+
 
         // Send message
         WebElement send_button = (new WebDriverWait(driver, 10)).until(ExpectedConditions.elementToBeClickable(By.xpath("//div[text()='Send']")));
